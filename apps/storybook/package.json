@@ -12,14 +12,17 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^6.1.0",
     "@repo/ui": "*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@repo/tailwind-config": "*",
     "@chromatic-com/storybook": "^1.9.0",
     "@eslint/js": "^9.9.0",
+    "@repo/tailwind-config": "*",
     "@repo/typescript-config": "*",
     "@storybook/addon-essentials": "^8.3.0",
     "@storybook/addon-interactions": "^8.3.0",

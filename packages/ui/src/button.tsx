@@ -1,20 +1,30 @@
 "use client";
 
-import { ReactNode } from "react";
+import Stack from "@mui/material/Stack";
+import MuiButton from "@mui/material/Button";
 
 interface ButtonProps {
-  children: ReactNode;
+  onClick: () => void;
+  children?: React.ReactNode;
   className?: string;
-  appName: string;
 }
 
-export const Button = ({ children, className, appName }: ButtonProps) => {
+export const Button: React.FC<ButtonProps> = ({
+  onClick,
+  children,
+  className,
+}) => {
   return (
-    <button
-      className={className}
-      onClick={() => alert(`Hello from your ${appName} app!`)}
-    >
-      {children}
-    </button>
+    <div className="ml-2">
+      <Stack spacing={2} direction="row">
+        <MuiButton
+          variant="contained"
+          onClick={onClick}
+          className={`w-full ${className}`}
+        >
+          {children || "Enter button text"}
+        </MuiButton>
+      </Stack>
+    </div>
   );
 };

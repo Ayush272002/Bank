@@ -1,7 +1,9 @@
-import { Button } from "@repo/ui/button";
-
 function App() {
-  return <Button appName="storybook">Click me</Button>;
+  return (
+    <div>
+      <h1>Hello from storybook</h1>
+    </div>
+  );
 }
 
 export default App;
