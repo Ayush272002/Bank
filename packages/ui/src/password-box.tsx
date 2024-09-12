@@ -12,8 +12,10 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 export const PasswordBox = ({
   onChange,
+  label = "Password",
 }: {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  label?: string;
 }) => {
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -35,9 +37,7 @@ export const PasswordBox = ({
     <Box sx={{ display: "flex", flexWrap: "wrap" }}>
       <div>
         <FormControl sx={{ m: 1, width: "40ch" }} variant="outlined">
-          <InputLabel htmlFor="outlined-adornment-password">
-            Password
-          </InputLabel>
+          <InputLabel htmlFor="outlined-adornment-password">{label}</InputLabel>
           <OutlinedInput
             id="outlined-adornment-password"
             type={showPassword ? "text" : "password"}
@@ -54,7 +54,7 @@ export const PasswordBox = ({
                 </IconButton>
               </InputAdornment>
             }
-            label="Password"
+            label={label}
             onChange={onChange}
           />
         </FormControl>

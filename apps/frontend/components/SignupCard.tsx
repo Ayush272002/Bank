@@ -6,10 +6,11 @@ import { PasswordBox } from "@repo/ui/password-box";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
-const SigninCard = () => {
+const SignupCard = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -19,35 +20,42 @@ const SigninCard = () => {
     setPassword(e.target.value);
   };
 
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  };
   return (
     <div className="flex justify-center items-center h-full md:p-12">
       <div className="flex flex-col gap-5">
         <div>
           <h4 className="m-0 font-inter font-medium text-[1.5rem] leading-[1.58334] text-customPrimary">
-            Welcome back!
+            Adventure starts here 🚀
           </h4>
-          <p className="">
-            Please sign-in to your account and start the adventure
-          </p>
+          <p className="">Please enter the details to create an account</p>
         </div>
 
+        <InputBox placeholder="Full Name" onChange={handleNameChange} />
         <InputBox placeholder="Email" onChange={handleEmailChange} />
         <PasswordBox onChange={handlePasswordChange} />
+        <PasswordBox onChange={handlePasswordChange} label="Confirm Password" />
         <Button
-          onClick={() => console.log(`Email: ${email}, Password: ${password}`)}
+          onClick={() =>
+            console.log(`Email: ${email}, Password: ${password} Name: ${name}`)
+          }
           className="w-[345px] ml-1"
         >
-          Sign in
+          Sign up
         </Button>
 
         <div className="flex justify-center items-center flex-wrap gap-2">
-          <p style={{ color: "rgba(46, 38, 61, 0.7)" }}>New on our platform?</p>
+          <p style={{ color: "rgba(46, 38, 61, 0.7)" }}>
+            Already have an account?
+          </p>
           <a
             style={{ color: "#8C57FF" }}
             className="cursor-pointer"
-            onClick={() => router.push("/signup")}
+            onClick={() => router.push("/signin")}
           >
-            Create an Account
+            Sign in instead
           </a>
         </div>
       </div>
@@ -55,4 +63,4 @@ const SigninCard = () => {
   );
 };
 
-export default SigninCard;
+export default SignupCard;
