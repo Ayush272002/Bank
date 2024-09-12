@@ -3,8 +3,12 @@
 import { Button } from "@repo/ui/button";
 import { InputBox } from "@repo/ui/input-box";
 import { PasswordBox } from "@repo/ui/password-box";
+import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { toast } from "react-toastify";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const SigninCard = () => {
   const router = useRouter();
@@ -17,6 +21,39 @@ const SigninCard = () => {
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
+  };
+
+  const handleSignin = async () => {
+    if (!email || !password) {
+      toast.error("Please fill all the fields");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/user/signin`,
+        {
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+      if (response.status === 200) {
+        // router.push("/api/auth/signin");
+        toast.success("Sign in successful");
+      } else {
+        toast.error(response.data.error || "Something went wrong");
+      }
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error("An error occurred during sign in. Please try again.");
+      }
+      console.error("Signin error:", error);
+    }
   };
 
   return (
@@ -33,10 +70,7 @@ const SigninCard = () => {
 
         <InputBox placeholder="Email" onChange={handleEmailChange} />
         <PasswordBox onChange={handlePasswordChange} />
-        <Button
-          onClick={() => console.log(`Email: ${email}, Password: ${password}`)}
-          className="w-[345px] ml-1"
-        >
+        <Button onClick={handleSignin} className="w-[345px] ml-1">
           Sign in
         </Button>
 
