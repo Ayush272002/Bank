@@ -10,7 +10,7 @@ const meta: Meta<typeof Button> = {
   argTypes: {
     onClick: { action: "clicked", description: "Button click handler" },
     children: { control: "text", description: "Button text" },
-    className: { control: "text", description: "Custom CSS classes" },
+    sx: { control: "object", description: "Custom Material-UI styles" },
   },
 } satisfies Meta<typeof Button>;
 
@@ -20,14 +20,21 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     children: "Click Me",
-    className: "",
   },
 };
 
 export const CustomText: Story = {
   args: {
     children: "Custom Text",
-    className: "bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600",
+    sx: {
+      backgroundColor: "green",
+      color: "white",
+      padding: "8px 16px",
+      borderRadius: "8px",
+      "&:hover": {
+        backgroundColor: "darkgreen",
+      },
+    },
   },
 };
 
@@ -35,6 +42,27 @@ export const CustomAction: Story = {
   args: {
     children: "Action Button",
     onClick: () => alert("Button clicked"),
-    className: "bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600",
+    sx: {
+      backgroundColor: "red",
+      color: "white",
+      padding: "8px 16px",
+      borderRadius: "8px",
+      "&:hover": {
+        backgroundColor: "darkred",
+      },
+    },
+  },
+};
+
+export const DisabledButton: Story = {
+  args: {
+    children: "Disabled Button",
+    sx: {
+      backgroundColor: "gray",
+      color: "white",
+      padding: "8px 16px",
+      borderRadius: "8px",
+    },
+    onClick: undefined,
   },
 };

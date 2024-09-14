@@ -99,9 +99,7 @@ const SignupCard = () => {
           onChange={handleConfirmPasswordChange}
           label="Confirm Password"
         />
-        <Button onClick={signUpHandler} className="w-[345px] ml-1">
-          Sign up
-        </Button>
+        <Button onClick={signUpHandler}>Sign up</Button>
 
         <div className="flex justify-center items-center flex-wrap gap-2">
           <p style={{ color: "rgba(46, 38, 61, 0.7)" }}>

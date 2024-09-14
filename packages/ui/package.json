@@ -7,7 +7,8 @@
     "./password-box": "./src/password-box.tsx",
     "./button": "./src/button.tsx",
     "./card": "./src/card.tsx",
-    "./code": "./src/code.tsx"
+    "./code": "./src/code.tsx",
+    "./link-item": "./src/LinkItem.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

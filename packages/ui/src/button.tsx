@@ -4,15 +4,15 @@ import Stack from "@mui/material/Stack";
 import MuiButton from "@mui/material/Button";
 
 interface ButtonProps {
-  onClick: () => void;
+  onClick?: () => void;
   children?: React.ReactNode;
-  className?: string;
+  sx?: object;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   onClick,
-  children,
-  className,
+  children = "Enter button text",
+  sx = {}, // Default empty object for sx
 }) => {
   return (
     <div className="ml-2">
@@ -20,9 +20,10 @@ export const Button: React.FC<ButtonProps> = ({
         <MuiButton
           variant="contained"
           onClick={onClick}
-          className={`w-full ${className}`}
+          className="w-full"
+          sx={sx}
         >
-          {children || "Enter button text"}
+          {children}
         </MuiButton>
       </Stack>
     </div>
