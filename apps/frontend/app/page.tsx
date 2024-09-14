@@ -1,11 +1,14 @@
 import { LinkItem } from "@repo/ui/link-item";
 import Appbar from "../components/Appbar";
+import { LandingCard } from "@repo/ui/LandingCard";
 
 export default function Home() {
   return (
     <div>
-      <Appbar />
-      <div className="ml-[3rem] mt-[4rem] flex justify-center">
+      <div className="mb-2">
+        <Appbar />
+      </div>
+      <div className="ml-[3rem] mt-[6rem] flex justify-center">
         <div>
           <img
             src="14924-carpenter-laptop-home-improvement-933x400.jpg"
@@ -59,6 +62,32 @@ export default function Home() {
           <LinkItem label="Investing" />
           <LinkItem label="Insurance" />
         </div>
+      </div>
+
+      <div className="flex justify-center">
+        <LandingCard
+          label="Looking for help"
+          description="Find answers to your questions and get the latest guidance."
+          imgSrc="looking-help.jpeg"
+          links={["Digitial reset", "Managing your account"]}
+        />
+
+        <LandingCard
+          label="How safe is my money?"
+          description="When times are tough, knowing your money's safe can be reassuring."
+          imgSrc="safe_money.jpeg"
+          links={["How to bank safely online", "Find out more about savings"]}
+        />
+
+        <LandingCard
+          label="Growing your money"
+          description="Explore ways you could make the most of your money to help reach your goals."
+          imgSrc="goals.jpeg"
+          links={[
+            "How to set long-term financial goals",
+            "Saving vs investing",
+          ]}
+        />
       </div>
     </div>
   );

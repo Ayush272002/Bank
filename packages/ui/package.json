@@ -6,7 +6,7 @@
     "./input-box": "./src/input-box.tsx",
     "./password-box": "./src/password-box.tsx",
     "./button": "./src/button.tsx",
-    "./card": "./src/card.tsx",
+    "./LandingCard": "./src/LandingCard.tsx",
     "./code": "./src/code.tsx",
     "./link-item": "./src/LinkItem.tsx"
   },

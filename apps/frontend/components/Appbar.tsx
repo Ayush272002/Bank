@@ -7,7 +7,7 @@ const Appbar = () => {
   const router = useRouter();
 
   return (
-    <div className="flex border-b justify-between p-4">
+    <div className="flex border-b justify-between p-4 bg-slate-50 fixed top-0 w-full">
       <div className="flex flex-col justify-center text-2xl font-extrabold text-slate-700">
         Bank
       </div>
