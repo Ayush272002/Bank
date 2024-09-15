@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import prismaClientSingleton from "@repo/db/client";
 import { signupInput } from "@repo/zodschema/zodschema";
-import { sign } from "hono/jwt";
-import { setCookie } from "hono/cookie";
+import { sign, verify } from "hono/jwt";
+import { getCookie } from "hono/cookie";
 
 export const userRouter = new Hono<{
   Bindings: {
@@ -78,16 +78,16 @@ userRouter.post("/signup", async (c) => {
       c.env.JWT_SECRET,
     );
 
-    setCookie(c, "auth_token", jwt, {
-      path: "/",
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: true,
-      maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
-    });
+    // setCookie(c, "auth_token", jwt, {
+    //   path: "/",
+    //   httpOnly: true,
+    //   sameSite: "None",
+    //   secure: false,
+    //   maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
+    // });
 
     c.status(200);
-    return c.json({ message: "User created successfully", user });
+    return c.json({ jwt: jwt });
   } catch (e) {
     c.status(403);
     return c.json({ error: "Error creating user" });
@@ -135,14 +135,64 @@ userRouter.post("/signin", async (c) => {
     c.env.JWT_SECRET,
   );
 
-  setCookie(c, "auth_token", jwt, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "Lax",
-    secure: true,
-    maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
-  });
+  // setCookie(c, "auth_token", jwt, {
+  //   path: "/",
+  //   httpOnly: true,
+  //   sameSite: "None",
+  //   secure: false,
+  //   maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
+  // });
 
   c.status(200);
-  return c.json({ message: "signin successfully", user });
+  return c.json({ jwt: jwt });
+});
+
+userRouter.get("/currUser", async (c) => {
+  const header = c.req.header("Authorization");
+  if (!header) {
+    c.status(403);
+    return c.json({ error: "Unauthorized 1" });
+  }
+
+  const token = header.split(" ")[1];
+  if (!token || header.split(" ")[0] !== "Bearer") {
+    c.status(403);
+    return c.json({ error: "Unauthorized 2" });
+  }
+
+  console.log("control before try");
+  try {
+    const res = (await verify(token, c.env.JWT_SECRET)) as { id: string };
+    console.log("control after verify");
+    if (!res || !res.id) {
+      return c.json({ error: "unauthorized 3" }, 403);
+    }
+
+    console.log("control before prisma");
+    const prisma = prismaClientSingleton(c.env.DATABASE_URL);
+    const user = await prisma.user.findUnique({
+      where: {
+        id: Number(res.id),
+      },
+      select: {
+        name: true,
+        balance: {
+          select: {
+            amount: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      c.status(403);
+      return c.json({ error: "User not found" });
+    }
+
+    c.status(200);
+    return c.json({ name: user.name });
+  } catch (e) {
+    c.status(403);
+    return c.json({ error: "unauthorized 4" });
+  }
 });

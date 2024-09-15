@@ -28,7 +28,6 @@ paymentRouter.use("/*", async (c, next) => {
     }
 
     c.set("userId", res.id);
-    console.log("control before next");
     await next();
   } catch (e) {
     return c.json({ error: "unauthorized" }, 403);

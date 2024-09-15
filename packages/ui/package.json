@@ -8,7 +8,8 @@
     "./button": "./src/button.tsx",
     "./LandingCard": "./src/LandingCard.tsx",
     "./code": "./src/code.tsx",
-    "./link-item": "./src/LinkItem.tsx"
+    "./link-item": "./src/LinkItem.tsx",
+    "./loader": "./src/Loader.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

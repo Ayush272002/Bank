@@ -30,18 +30,13 @@ const SigninCard = () => {
     }
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/api/v1/user/signin`,
-        {
-          email,
-          password,
-        },
-        {
-          withCredentials: true,
-        },
-      );
+      const response = await axios.post(`${API_BASE_URL}/api/v1/user/signin`, {
+        email,
+        password,
+      });
       if (response.status === 200) {
-        // router.push("/api/auth/signin");
+        localStorage.setItem("jwt", response.data.jwt);
+        router.push("/dashboard");
         toast.success("Sign in successful");
       } else {
         toast.error(response.data.error || "Something went wrong");

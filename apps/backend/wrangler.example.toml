@@ -6,7 +6,7 @@ compatibility_date = "2024-09-10"
 DATABASE_URL=""
 JWT_SECRET=""
 WEBHOOK_URL=""
-ALLOWED_ORIGINS="http://localhost:3000"
+# ALLOWED_ORIGINS="http://localhost:3000"
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
