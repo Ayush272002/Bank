@@ -151,24 +151,21 @@ userRouter.get("/currUser", async (c) => {
   const header = c.req.header("Authorization");
   if (!header) {
     c.status(403);
-    return c.json({ error: "Unauthorized 1" });
+    return c.json({ error: "Unauthorized" });
   }
 
   const token = header.split(" ")[1];
   if (!token || header.split(" ")[0] !== "Bearer") {
     c.status(403);
-    return c.json({ error: "Unauthorized 2" });
+    return c.json({ error: "Unauthorized" });
   }
 
-  console.log("control before try");
   try {
     const res = (await verify(token, c.env.JWT_SECRET)) as { id: string };
-    console.log("control after verify");
     if (!res || !res.id) {
-      return c.json({ error: "unauthorized 3" }, 403);
+      return c.json({ error: "unauthorized" }, 403);
     }
 
-    console.log("control before prisma");
     const prisma = prismaClientSingleton(c.env.DATABASE_URL);
     const user = await prisma.user.findUnique({
       where: {
@@ -190,9 +187,95 @@ userRouter.get("/currUser", async (c) => {
     }
 
     c.status(200);
-    return c.json({ name: user.name });
+    return c.json({ name: user.name, balance: user.balance?.amount });
   } catch (e) {
     c.status(403);
-    return c.json({ error: "unauthorized 4" });
+    return c.json({ error: "unauthorized" });
+  }
+});
+
+userRouter.get("/getRecentTransactions", async (c) => {
+  const header = c.req.header("Authorization");
+  if (!header) {
+    c.status(403);
+    return c.json({ error: "Unauthorized" });
+  }
+
+  const token = header.split(" ")[1];
+  if (!token || header.split(" ")[0] !== "Bearer") {
+    c.status(403);
+    return c.json({ error: "Unauthorized" });
+  }
+
+  try {
+    const res = (await verify(token, c.env.JWT_SECRET)) as { id: string };
+    if (!res || !res.id) {
+      return c.json({ error: "unauthorized" }, 403);
+    }
+
+    const prisma = prismaClientSingleton(c.env.DATABASE_URL);
+    const recentTransactions = await prisma.transaction.findMany({
+      where: {
+        OR: [{ senderId: Number(res.id) }, { receiverId: Number(res.id) }],
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 5,
+    });
+
+    c.status(200);
+    return c.json(recentTransactions);
+  } catch (e) {
+    c.status(403);
+    return c.json({ error: "unauthorized" });
+  }
+});
+
+userRouter.get("/getAllTransactions", async (c) => {
+  const header = c.req.header("Authorization");
+  if (!header) {
+    c.status(403);
+    return c.json({ error: "Unauthorized" });
+  }
+
+  const token = header.split(" ")[1];
+  if (!token || header.split(" ")[0] !== "Bearer") {
+    c.status(403);
+    return c.json({ error: "Unauthorized" });
+  }
+
+  try {
+    const res = (await verify(token, c.env.JWT_SECRET)) as { id: string };
+    if (!res || !res.id) {
+      return c.json({ error: "unauthorized" }, 403);
+    }
+
+    const prisma = prismaClientSingleton(c.env.DATABASE_URL);
+    const user = await prisma.user.findUnique({
+      where: {
+        id: Number(res.id),
+      },
+      select: {
+        transactionsSent: true,
+        transactionsReceived: true,
+      },
+    });
+
+    if (!user) {
+      c.status(403);
+      return c.json({ error: "User not found" });
+    }
+
+    const allTransactions = [
+      ...user.transactionsSent,
+      ...user.transactionsReceived,
+    ];
+
+    c.status(200);
+    return c.json(allTransactions);
+  } catch (e) {
+    c.status(403);
+    return c.json({ error: "unauthorized" });
   }
 });

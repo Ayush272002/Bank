@@ -3,31 +3,51 @@ import { Loader } from "@repo/ui/loader";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import AppbarClient from "../../../components/AppbarClient";
+import RecentTransactions from "../../../components/RecentTransactions";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function () {
   const [name, setName] = useState("");
+  const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [recentTransactions, setRecentTransactions] = useState([]);
 
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/api/v1/user/currUser`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        },
-      })
-      .then((response) => {
-        if (response.status === 200) {
-          setName(response.data.name);
+    const fetchUserData = async () => {
+      try {
+        const userResponse = await axios.get(
+          `${API_BASE_URL}/api/v1/user/currUser`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+            },
+          },
+        );
+        if (userResponse.status === 200) {
+          setName(userResponse.data.name);
+          setBalance(userResponse.data.balance / 100);
         }
-      })
-      .catch((error) => {
+
+        const transactionsResponse = await axios.get(
+          `${API_BASE_URL}/api/v1/user/getRecentTransactions`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+            },
+          },
+        );
+        if (transactionsResponse.status === 200) {
+          setRecentTransactions(transactionsResponse.data);
+        }
+      } catch (error) {
         console.error(error);
-      })
-      .finally(() => {
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   if (loading) {
@@ -72,7 +92,7 @@ export default function () {
 
           <div className="p-6" data-id="31">
             <div className="text-2xl font-bold" data-id="32">
-              £12,345.67
+              £{balance}
             </div>
             <p className="text-xs text-black" data-id="33">
               +2.5% from last month
@@ -170,7 +190,9 @@ export default function () {
       </div>
 
       {/* recent transaction */}
-      <div
+
+      <RecentTransactions transactions={recentTransactions} />
+      {/* <div
         className="rounded-lg border bg-stone-200 text-black shadow-sm mb-8"
         data-id="55"
         data-v0-t="card"
@@ -286,7 +308,7 @@ export default function () {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* footer */}
       <div
