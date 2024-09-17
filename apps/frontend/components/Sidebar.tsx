@@ -1,4 +1,8 @@
+"use client";
+import { useRouter } from "next/navigation";
+
 const Sidebar = () => {
+  const router = useRouter();
   return (
     <div className="w-64 p-6 shadow-md">
       <div className="flex items-center mb-8">
@@ -24,7 +28,7 @@ const Sidebar = () => {
       <nav>
         <button
           className="inline-flex items-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-200 hover:text-slate-900 h-10 px-4 py-2 w-full justify-start mb-2 text-slate-700"
-          data-id="7"
+          onClick={() => router.push("/dashboard")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -47,7 +51,7 @@ const Sidebar = () => {
 
         <button
           className="inline-flex items-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-200 hover:text-slate-900 h-10 px-4 py-2 w-full justify-start mb-2 text-slate-700"
-          data-id="9"
+          onClick={() => router.push("/accounts")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +74,7 @@ const Sidebar = () => {
 
         <button
           className="inline-flex items-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-200 hover:text-slate-900 h-10 px-4 py-2 w-full justify-start mb-2 text-slate-700"
-          data-id="11"
+          onClick={() => router.push("/transfers")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -93,7 +97,7 @@ const Sidebar = () => {
 
         <button
           className="inline-flex items-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-200 hover:text-slate-900 h-10 px-4 py-2 w-full justify-start mb-2 text-slate-700"
-          data-id="13"
+          onClick={() => router.push("/analytics")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -116,7 +120,7 @@ const Sidebar = () => {
 
         <button
           className="inline-flex items-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-slate-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-slate-200 hover:text-slate-900 h-10 px-4 py-2 w-full justify-start text-slate-700"
-          data-id="15"
+          onClick={() => router.push("/settings")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
