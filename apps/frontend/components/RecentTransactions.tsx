@@ -7,6 +7,8 @@ interface Transaction {
   createdAt: string;
   senderId?: number;
   receiverId?: number;
+  sender?: { name: string }; // Make sure sender is optional and includes name
+  receiver?: { name: string }; // Make sure receiver is optional and includes name
 }
 
 interface RecentTransactionsProps {
@@ -36,10 +38,12 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
               <div className="ml-4 space-y-1">
                 <p className="text-sm font-medium leading-none">
                   {transaction.type === "DEPOSIT"
-                    ? "Deposit"
+                    ? `Deposit from ${transaction.receiver?.name || "Unknown"}`
                     : transaction.type === "WITHDRAWAL"
-                      ? "Withdrawal"
-                      : "Transfer"}
+                      ? `Withdrawal to ${transaction.sender?.name || "Unknown"}`
+                      : transaction.senderId === null
+                        ? `Received from ${transaction.sender?.name || "Unknown"}`
+                        : `Sent to ${transaction.receiver?.name || "Unknown"}`}
                 </p>
                 <p className="text-sm text-black">
                   {new Date(transaction.createdAt).toLocaleDateString()}

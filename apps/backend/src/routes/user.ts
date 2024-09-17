@@ -214,6 +214,8 @@ userRouter.get("/getRecentTransactions", async (c) => {
     }
 
     const prisma = prismaClientSingleton(c.env.DATABASE_URL);
+
+    // Query for recent transactions along with sender and receiver names
     const recentTransactions = await prisma.transaction.findMany({
       where: {
         OR: [{ senderId: Number(res.id) }, { receiverId: Number(res.id) }],
@@ -222,8 +224,13 @@ userRouter.get("/getRecentTransactions", async (c) => {
         createdAt: "desc",
       },
       take: 5,
+      include: {
+        sender: { select: { name: true } }, // Fetch sender's name
+        receiver: { select: { name: true } }, // Fetch receiver's name
+      },
     });
 
+    console.log(recentTransactions);
     c.status(200);
     return c.json(recentTransactions);
   } catch (e) {
