@@ -13,5 +13,11 @@ export const signupInput = z.object({
     .regex(/[\W_]/, "Password must contain at least one special character"),
 });
 
+export const updateUserInput = z.object({
+  email: z.string().email().optional(),
+  name: z.string().optional(),
+  number: z.string().min(10, "Number must be 10 digits long").optional(),
+});
+
 //type inference
 export type SignupInput = z.infer<typeof signupInput>;

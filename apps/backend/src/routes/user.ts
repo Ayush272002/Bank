@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import prismaClientSingleton from "@repo/db/client";
-import { signupInput } from "@repo/zodschema/zodschema";
+import { signupInput, updateUserInput } from "@repo/zodschema/zodschema";
 import { sign, verify } from "hono/jwt";
 import { getCookie } from "hono/cookie";
 
@@ -173,6 +173,8 @@ userRouter.get("/currUser", async (c) => {
       },
       select: {
         name: true,
+        email: true,
+        number: true,
         balance: {
           select: {
             amount: true,
@@ -187,7 +189,12 @@ userRouter.get("/currUser", async (c) => {
     }
 
     c.status(200);
-    return c.json({ name: user.name, balance: user.balance?.amount });
+    return c.json({
+      name: user.name,
+      balance: user.balance?.amount,
+      email: user.email,
+      number: user.number,
+    });
   } catch (e) {
     c.status(403);
     return c.json({ error: "unauthorized" });
@@ -281,6 +288,65 @@ userRouter.get("/getAllTransactions", async (c) => {
 
     c.status(200);
     return c.json(allTransactions);
+  } catch (e) {
+    c.status(403);
+    return c.json({ error: "unauthorized" });
+  }
+});
+
+userRouter.post("/updateUser", async (c) => {
+  const header = c.req.header("Authorization");
+  const body = await c.req.json();
+  const validatedData = updateUserInput.safeParse(body);
+  if (!validatedData.success) {
+    c.status(400);
+    return c.json({
+      error: validatedData.error.errors.map((err) => err.message).join(", "),
+    });
+  }
+
+  if (!header) {
+    c.status(403);
+    return c.json({ error: "Unauthorized" });
+  }
+
+  const token = header.split(" ")[1];
+  if (!token || header.split(" ")[0] !== "Bearer") {
+    c.status(403);
+    return c.json({ error: "Unauthorized" });
+  }
+
+  try {
+    const res = (await verify(token, c.env.JWT_SECRET)) as { id: string };
+    if (!res || !res.id) {
+      return c.json({ error: "unauthorized" }, 403);
+    }
+
+    const prisma = prismaClientSingleton(c.env.DATABASE_URL);
+    const user = await prisma.user.findUnique({
+      where: {
+        id: Number(res.id),
+      },
+    });
+
+    if (!user) {
+      c.status(403);
+      return c.json({ error: "User not found" });
+    }
+
+    await prisma.user.update({
+      where: {
+        id: Number(res.id),
+      },
+      data: {
+        email: body.email,
+        name: body.name,
+        number: body.number,
+      },
+    });
+
+    c.status(200);
+    return c.json({ message: "User updated" });
   } catch (e) {
     c.status(403);
     return c.json({ error: "unauthorized" });

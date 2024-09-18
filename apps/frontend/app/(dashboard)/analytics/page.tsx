@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -8,14 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   LineChart,
   Line,
@@ -38,7 +29,6 @@ import {
   UtensilsIcon,
 } from "lucide-react";
 
-// Mock data for charts
 const balanceData = [
   { name: "Jan", balance: 5000 },
   { name: "Feb", balance: 5500 },
@@ -68,35 +58,12 @@ const spendingCategoryData = [
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 export default function BankAnalytics() {
-  const [timeframe, setTimeframe] = useState("6m");
-
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Financial Analytics</h1>
 
-      <div className="flex justify-between items-center mb-6">
-        <Tabs defaultValue="overview" className="w-[400px]">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="income">Income</TabsTrigger>
-            <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <Select value={timeframe} onValueChange={setTimeframe}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select timeframe" />
-          </SelectTrigger>
-          <SelectContent className="bg-stone-200">
-            <SelectItem value="1m">Last Month</SelectItem>
-            <SelectItem value="3m">Last 3 Months</SelectItem>
-            <SelectItem value="6m">Last 6 Months</SelectItem>
-            <SelectItem value="1y">Last Year</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        <Card>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6 bg-">
+        <Card className="bg-stone-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
             <PoundSterlingIcon className="h-4 w-4 text-muted-foreground" />
@@ -108,7 +75,7 @@ export default function BankAnalytics() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-stone-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Income</CardTitle>
             <ArrowUpIcon className="h-4 w-4 text-muted-foreground" />
@@ -120,7 +87,7 @@ export default function BankAnalytics() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-stone-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Expenses</CardTitle>
             <ArrowDownIcon className="h-4 w-4 text-muted-foreground" />
@@ -132,7 +99,7 @@ export default function BankAnalytics() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-stone-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Savings Rate</CardTitle>
             <CreditCardIcon className="h-4 w-4 text-muted-foreground" />
@@ -147,7 +114,7 @@ export default function BankAnalytics() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 mb-6">
-        <Card>
+        <Card className="bg-stone-200">
           <CardHeader>
             <CardTitle>Balance Trend</CardTitle>
             <CardDescription>
@@ -166,7 +133,7 @@ export default function BankAnalytics() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-stone-200">
           <CardHeader>
             <CardTitle>Income vs Expenses</CardTitle>
             <CardDescription>Comparison over the last 6 months</CardDescription>
@@ -187,7 +154,7 @@ export default function BankAnalytics() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 mb-6">
-        <Card>
+        <Card className="bg-stone-200">
           <CardHeader>
             <CardTitle>Spending by Category</CardTitle>
             <CardDescription>Your expense breakdown</CardDescription>
@@ -216,7 +183,7 @@ export default function BankAnalytics() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-stone-200">
           <CardHeader>
             <CardTitle>Top Spending Categories</CardTitle>
             <CardDescription>Where your money goes</CardDescription>
