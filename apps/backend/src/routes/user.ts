@@ -1,6 +1,10 @@
 import { Hono } from "hono";
 import prismaClientSingleton from "@repo/db/client";
-import { signupInput, updateUserInput } from "@repo/zodschema/zodschema";
+import {
+  signupInput,
+  updatePasswordInput,
+  updateUserInput,
+} from "@repo/zodschema/zodschema";
 import { sign, verify } from "hono/jwt";
 import { getCookie } from "hono/cookie";
 
@@ -347,6 +351,102 @@ userRouter.post("/updateUser", async (c) => {
 
     c.status(200);
     return c.json({ message: "User updated" });
+  } catch (e) {
+    c.status(403);
+    return c.json({ error: "unauthorized" });
+  }
+});
+
+userRouter.put("/updatePassword", async (c) => {
+  const header = c.req.header("Authorization");
+  const body = await c.req.json();
+
+  if (!header) {
+    c.status(403);
+    return c.json({ error: "Unauthorized" });
+  }
+
+  const token = header.split(" ")[1];
+  if (!token || header.split(" ")[0] !== "Bearer") {
+    c.status(403);
+    return c.json({ error: "Unauthorized" });
+  }
+
+  const validatedData = updatePasswordInput.safeParse(body.newPassword);
+  if (!validatedData.success) {
+    c.status(400);
+    console.log(validatedData.error.errors);
+    return c.json({
+      error: validatedData.error.errors.map((err) => err.message).join(", "),
+    });
+  }
+
+  try {
+    const res = (await verify(token, c.env.JWT_SECRET)) as { id: string };
+    if (!res || !res.id) {
+      return c.json({ error: "unauthorized" }, 403);
+    }
+
+    const prisma = prismaClientSingleton(c.env.DATABASE_URL);
+    const user = await prisma.user.findUnique({
+      where: {
+        id: Number(res.id),
+      },
+    });
+
+    if (!user) {
+      c.status(403);
+      return c.json({ error: "User not found" });
+    }
+
+    async function hashPassword(password: string) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+
+      return hashHex;
+    }
+
+    async function verifyPassword(storedHash: string, password: string) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+
+      return hashHex === storedHash;
+    }
+    const passwordMatches = await verifyPassword(
+      user.password,
+      body.oldPassword,
+    );
+
+    if (!passwordMatches) {
+      c.status(403);
+      return c.json({ error: "Invalid password" });
+    }
+
+    const hashedPassword = await hashPassword(body.newPassword);
+
+    await prisma.user.update({
+      where: {
+        id: Number(res.id),
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    c.status(200);
+    return c.json({ message: "Password updated" });
   } catch (e) {
     c.status(403);
     return c.json({ error: "unauthorized" });

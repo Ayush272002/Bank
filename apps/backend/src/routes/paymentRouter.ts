@@ -14,28 +14,89 @@ export const paymentRouter = new Hono<{
   };
 }>();
 
-paymentRouter.use("/*", async (c, next) => {
-  const authToken = getCookie(c, "auth_token");
-  if (!authToken) {
-    c.status(403);
+paymentRouter.post("/transfer", async (c) => {
+  const header = c.req.header("Authorization");
+  const body = await c.req.json();
+
+  if (!header) {
+    return c.json({ error: "Missing Authorization header" }, 400);
+  }
+
+  const token = header.split(" ")[1];
+  if (!token || header.split(" ")[0] !== "Bearer") {
     return c.json({ error: "Unauthorized" }, 403);
   }
 
   try {
-    const res = (await verify(authToken, c.env.JWT_SECRET)) as { id: string };
+    const res = (await verify(token, c.env.JWT_SECRET)) as { id: string };
     if (!res || !res.id) {
-      return c.json({ error: "unauthorized" }, 403);
+      return c.json({ error: "Unauthorized" }, 403);
     }
 
-    c.set("userId", res.id);
-    await next();
+    const prisma = prismaClientSingleton(c.env.DATABASE_URL);
+    const transferAmount = parseFloat(body.amount) * 100;
+
+    await prisma.$transaction(async (tx) => {
+      const sender = await tx.balance.findUnique({
+        where: {
+          userId: Number(res.id),
+        },
+      });
+
+      if (!sender || sender.amount < transferAmount) {
+        throw new Error("Insufficient funds");
+      }
+
+      const recipientUser = await tx.user.findUnique({
+        where: { email: body.recipient },
+      });
+
+      if (!recipientUser) {
+        throw new Error("Recipient not found");
+      }
+
+      const recipientBalance = await tx.balance.findUnique({
+        where: { userId: recipientUser.id },
+      });
+
+      if (!recipientBalance) {
+        throw new Error("Recipient balance not found");
+      }
+
+      await tx.balance.update({
+        where: {
+          userId: Number(res.id),
+        },
+        data: {
+          amount: { decrement: transferAmount },
+        },
+      });
+
+      await tx.balance.update({
+        where: {
+          userId: recipientUser.id,
+        },
+        data: {
+          amount: { increment: transferAmount },
+        },
+      });
+
+      await tx.transaction.create({
+        data: {
+          amount: transferAmount,
+          type: "TRANSFER",
+          senderId: Number(res.id),
+          receiverId: recipientUser.id,
+        },
+      });
+    });
+
+    return c.json({ message: "Transfer successful" }, 200);
   } catch (e) {
-    return c.json({ error: "unauthorized" }, 403);
+    console.error("Error during transfer:", e);
+    return c.json({ error: "Unauthorized or server error" }, 403);
   }
 });
-
-// TODO : Implement the deposit route
-paymentRouter.post("/deposit", async (c) => {});
 
 paymentRouter.post("/withdraw", async (c) => {
   console.log("control in start of withdraw");

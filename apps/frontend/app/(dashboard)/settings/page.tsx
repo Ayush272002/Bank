@@ -29,6 +29,9 @@ export default function SettingsPage() {
   const [email, setEmail] = useState("");
   const [number, setNumber] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -77,7 +80,35 @@ export default function SettingsPage() {
       }
     } catch (error: any) {
       console.error(error);
-      toast.error("Failed to update user details : " + error.message);
+      toast.error("Failed to update user details");
+    }
+  };
+
+  const changePassHandler = async () => {
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      const res = await axios.put(
+        `${API_BASE_URL}/api/v1/user/updatePassword`,
+        {
+          oldPassword: currentPassword,
+          newPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          },
+        },
+      );
+      if (res.status === 200) {
+        toast.success("User details updated successfully");
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Failed to update user details");
     }
   };
 
@@ -175,15 +206,27 @@ export default function SettingsPage() {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="current-password">Current Password</Label>
-                  <Input id="current-password" type="password" />
+                  <Input
+                    id="current-password"
+                    type="password"
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="new-password">New Password</Label>
-                  <Input id="new-password" type="password" />
+                  <Input
+                    id="new-password"
+                    type="password"
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Confirm New Password</Label>
-                  <Input id="confirm-password" type="password" />
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
                 </div>
                 <div className="flex items-center justify-between bg-gray-100 p-4 rounded-lg">
                   <div className="space-y-0.5">
@@ -204,7 +247,10 @@ export default function SettingsPage() {
                     className="scale-125 data-[state=checked]:bg-blue-500 data-[state=unchecked]:bg-gray-800"
                   />
                 </div>
-                <Button className="w-full bg-black text-white">
+                <Button
+                  className="w-full bg-black text-white"
+                  onClick={changePassHandler}
+                >
                   Update Security Settings
                 </Button>
               </CardContent>
@@ -255,20 +301,37 @@ export default function SettingsPage() {
                   <Label>Notification Frequency</Label>
                   <RadioGroup defaultValue="daily">
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="realtime" id="realtime" />
+                      <RadioGroupItem
+                        value="realtime"
+                        id="realtime"
+                        className="bg-white"
+                      />
                       <Label htmlFor="realtime">Real-time</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="daily" id="daily" />
+                      <RadioGroupItem
+                        value="daily"
+                        id="daily"
+                        className="bg-white"
+                      />
                       <Label htmlFor="daily">Daily Summary</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="weekly" id="weekly" />
+                      <RadioGroupItem
+                        value="weekly"
+                        id="weekly"
+                        className="bg-white"
+                      />
                       <Label htmlFor="weekly">Weekly Summary</Label>
                     </div>
                   </RadioGroup>
                 </div>
-                <Button className="bg-black text-white">
+                <Button
+                  className="bg-black text-white"
+                  onClick={() => {
+                    toast.success("Notification settings updated successfully");
+                  }}
+                >
                   Save Notification Settings
                 </Button>
               </CardContent>
