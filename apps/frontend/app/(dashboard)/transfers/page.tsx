@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,9 +19,51 @@ import { toast } from "react-toastify";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+interface Transaction {
+  id: number;
+  amount: number;
+  type: "DEPOSIT" | "WITHDRAWAL" | "TRANSFER";
+  createdAt: string;
+  senderId?: number;
+  receiverId?: number;
+  sender?: { name: string };
+  receiver?: { name: string };
+}
+
 export default function TransfersPage() {
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchTransactions = async (pageNum: number) => {
+    try {
+      const res = await axios.get(
+        `${API_BASE_URL}/api/v1/user/getAllTransactions`,
+        {
+          params: { page: pageNum, limit: 5 },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          },
+        },
+      );
+      if (res.status === 200) {
+        setTransactions((prevTransactions) =>
+          pageNum === 1
+            ? res.data.transactions
+            : [...prevTransactions, ...res.data.transactions],
+        );
+        setTotalPages(res.data.totalPages);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch transactions");
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions(1);
+  }, []);
 
   const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,9 +83,19 @@ export default function TransfersPage() {
 
       if (res.status === 200) {
         toast.success("Transfer successful");
+        setAmount("");
+        setRecipient("");
+        fetchTransactions(1);
       }
     } catch (error) {
       toast.error("Transfer failed");
+    }
+  };
+
+  const loadMoreTransactions = () => {
+    if (page < totalPages) {
+      setPage((prevPage) => prevPage + 1);
+      fetchTransactions(page + 1);
     }
   };
 
@@ -66,6 +118,7 @@ export default function TransfersPage() {
                   <Input
                     id="recipient"
                     placeholder="Enter recipient email"
+                    value={recipient}
                     onChange={(e) => setRecipient(e.target.value)}
                   />
                 </div>
@@ -79,6 +132,7 @@ export default function TransfersPage() {
                       type="number"
                       placeholder="0.00"
                       className="pl-10"
+                      value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                     />
                   </div>
@@ -98,38 +152,61 @@ export default function TransfersPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { name: "Sarah Johnson", amount: -50.0, date: "2023-06-15" },
-                { name: "Savings Account", amount: -200.0, date: "2023-06-14" },
-                { name: "John Smith", amount: -75.5, date: "2023-06-13" },
-                { name: "Current Account", amount: 500.0, date: "2023-06-12" },
-              ].map((transfer, index) => (
-                <div key={index} className="flex items-center">
+              {transactions.map((transaction) => (
+                <div key={transaction.id} className="flex items-center">
                   <Avatar className="h-9 w-9">
-                    <AvatarFallback>{transfer.name[0]}</AvatarFallback>
+                    <AvatarFallback>
+                      {transaction.type === "DEPOSIT"
+                        ? transaction.receiver?.name?.[0] || "D"
+                        : transaction.type === "WITHDRAWAL"
+                          ? transaction.sender?.name?.[0] || "W"
+                          : transaction.senderId === null
+                            ? transaction.sender?.name?.[0] || "R"
+                            : transaction.receiver?.name?.[0] || "S"}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="ml-4 space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {transfer.name}
+                      {transaction.type === "DEPOSIT"
+                        ? `Deposit from ${transaction.receiver?.name || "Unknown"}`
+                        : transaction.type === "WITHDRAWAL"
+                          ? `Withdrawal to ${transaction.sender?.name || "Unknown"}`
+                          : transaction.senderId === null
+                            ? `Received from ${transaction.sender?.name || "Unknown"}`
+                            : `Sent to ${transaction.receiver?.name || "Unknown"}`}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {transfer.date}
+                      {new Date(transaction.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <div
-                    className={`ml-auto font-medium ${transfer.amount > 0 ? "text-green-500" : "text-red-500"}`}
+                    className={`ml-auto font-medium ${
+                      transaction.type === "DEPOSIT" ||
+                      transaction.senderId === null
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }`}
                   >
-                    {transfer.amount > 0 ? "+" : ""}£
-                    {Math.abs(transfer.amount).toFixed(2)}
+                    {transaction.type === "DEPOSIT" ||
+                    transaction.senderId === null
+                      ? "+"
+                      : "-"}
+                    £{Math.abs(transaction.amount).toFixed(2)}
                   </div>
                 </div>
               ))}
             </div>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full text-white bg-black">
-              View All Transfers
-            </Button>
+            {page < totalPages && (
+              <Button
+                variant="outline"
+                className="w-full text-white bg-black"
+                onClick={loadMoreTransactions}
+              >
+                Load More Transactions
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </div>

@@ -226,7 +226,6 @@ userRouter.get("/getRecentTransactions", async (c) => {
 
     const prisma = prismaClientSingleton(c.env.DATABASE_URL);
 
-    // Query for recent transactions along with sender and receiver names
     const recentTransactions = await prisma.transaction.findMany({
       where: {
         OR: [{ senderId: Number(res.id) }, { receiverId: Number(res.id) }],
@@ -236,8 +235,8 @@ userRouter.get("/getRecentTransactions", async (c) => {
       },
       take: 5,
       include: {
-        sender: { select: { name: true } }, // Fetch sender's name
-        receiver: { select: { name: true } }, // Fetch receiver's name
+        sender: { select: { name: true } },
+        receiver: { select: { name: true } },
       },
     });
 
@@ -270,28 +269,46 @@ userRouter.get("/getAllTransactions", async (c) => {
     }
 
     const prisma = prismaClientSingleton(c.env.DATABASE_URL);
-    const user = await prisma.user.findUnique({
+
+    // Get pagination parameters from query string
+    const page = parseInt(c.req.query("page") || "1");
+    const limit = parseInt(c.req.query("limit") || "5");
+    const skip = (page - 1) * limit;
+
+    const transactions = await prisma.transaction.findMany({
       where: {
-        id: Number(res.id),
+        OR: [{ senderId: Number(res.id) }, { receiverId: Number(res.id) }],
       },
-      select: {
-        transactionsSent: true,
-        transactionsReceived: true,
+      orderBy: {
+        createdAt: "desc",
+      },
+      skip: skip,
+      take: limit,
+      include: {
+        sender: { select: { name: true } },
+        receiver: { select: { name: true } },
       },
     });
 
-    if (!user) {
-      c.status(403);
-      return c.json({ error: "User not found" });
-    }
+    const totalCount = await prisma.transaction.count({
+      where: {
+        OR: [{ senderId: Number(res.id) }, { receiverId: Number(res.id) }],
+      },
+    });
 
-    const allTransactions = [
-      ...user.transactionsSent,
-      ...user.transactionsReceived,
-    ];
+    // Convert amount to pounds
+    const formattedTransactions = transactions.map((t) => ({
+      ...t,
+      amount: t.amount / 100,
+    }));
 
     c.status(200);
-    return c.json(allTransactions);
+    return c.json({
+      transactions: formattedTransactions,
+      totalCount,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / limit),
+    });
   } catch (e) {
     c.status(403);
     return c.json({ error: "unauthorized" });

@@ -7,8 +7,8 @@ interface Transaction {
   createdAt: string;
   senderId?: number;
   receiverId?: number;
-  sender?: { name: string }; // Make sure sender is optional and includes name
-  receiver?: { name: string }; // Make sure receiver is optional and includes name
+  sender?: { name: string };
+  receiver?: { name: string };
 }
 
 interface RecentTransactionsProps {
